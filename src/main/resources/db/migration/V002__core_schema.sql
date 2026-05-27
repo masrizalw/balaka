@@ -27,11 +27,12 @@ CREATE TABLE company_config (
     is_pkp BOOLEAN,
     pkp_since DATE,
     -- Posting bridge accounts: resolve the document-level slots (AR/AP/PPN)
-    -- when invoices/bills compose their DRAFT journal via the template engine
-    id_receivable_account UUID REFERENCES chart_of_accounts(id),
-    id_payable_account UUID REFERENCES chart_of_accounts(id),
-    id_output_tax_account UUID REFERENCES chart_of_accounts(id),
-    id_input_tax_account UUID REFERENCES chart_of_accounts(id),
+    -- when invoices/bills compose their DRAFT journal via the template engine.
+    -- FK constraints added below, after chart_of_accounts is created.
+    id_receivable_account UUID,
+    id_payable_account UUID,
+    id_output_tax_account UUID,
+    id_input_tax_account UUID,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     created_by VARCHAR(100),
@@ -93,6 +94,17 @@ CREATE INDEX idx_coa_active ON chart_of_accounts(active);
 ALTER TABLE company_bank_accounts ADD CONSTRAINT fk_company_bank_account
     FOREIGN KEY (id_account) REFERENCES chart_of_accounts(id);
 CREATE INDEX idx_company_bank_account ON company_bank_accounts(id_account);
+
+-- FKs from company_config posting-bridge accounts to chart_of_accounts
+-- (company_config is created before chart_of_accounts, so constrain here)
+ALTER TABLE company_config ADD CONSTRAINT fk_company_config_receivable
+    FOREIGN KEY (id_receivable_account) REFERENCES chart_of_accounts(id);
+ALTER TABLE company_config ADD CONSTRAINT fk_company_config_payable
+    FOREIGN KEY (id_payable_account) REFERENCES chart_of_accounts(id);
+ALTER TABLE company_config ADD CONSTRAINT fk_company_config_output_tax
+    FOREIGN KEY (id_output_tax_account) REFERENCES chart_of_accounts(id);
+ALTER TABLE company_config ADD CONSTRAINT fk_company_config_input_tax
+    FOREIGN KEY (id_input_tax_account) REFERENCES chart_of_accounts(id);
 
 -- ============================================
 -- Journal Templates
