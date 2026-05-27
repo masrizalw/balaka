@@ -325,6 +325,10 @@ CREATE TABLE transactions (
     voided_by VARCHAR(100),
     posted_at TIMESTAMP,
     posted_by VARCHAR(100),
+    -- Generic link to the operational document that generated this transaction
+    -- (e.g. INVOICE/BILL). One document may map to many transactions (R2 revenue grouping).
+    source_document_type VARCHAR(30),
+    source_document_id UUID,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     created_by VARCHAR(100),
@@ -340,6 +344,7 @@ CREATE INDEX idx_trx_date ON transactions(transaction_date);
 CREATE INDEX idx_trx_template ON transactions(id_journal_template);
 CREATE INDEX idx_trx_status ON transactions(status);
 CREATE INDEX idx_transactions_project ON transactions(id_project);
+CREATE INDEX idx_trx_source_document ON transactions(source_document_type, source_document_id);
 
 -- ============================================
 -- Project Payment Terms

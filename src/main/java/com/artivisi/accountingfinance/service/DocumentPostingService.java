@@ -47,7 +47,8 @@ public class DocumentPostingService {
      */
     public Transaction createDraftFromTemplate(UUID fixedTemplateId, String templateName,
                                                LocalDate date, String description, BigDecimal amount,
-                                               Map<String, UUID> hintToAccount, String createdBy) {
+                                               Map<String, UUID> hintToAccount, String createdBy,
+                                               String sourceDocumentType, UUID sourceDocumentId) {
         JournalTemplate template = resolveTemplate(fixedTemplateId, templateName);
 
         Map<UUID, UUID> accountMappings = new HashMap<>();
@@ -68,6 +69,8 @@ public class DocumentPostingService {
         transaction.setAmount(amount);
         transaction.setDescription(description);
         transaction.setCreatedBy(createdBy);
+        transaction.setSourceDocumentType(sourceDocumentType);
+        transaction.setSourceDocumentId(sourceDocumentId);
 
         // create() sets DRAFT and stores the account mappings; journal is computed at post.
         return transactionService.create(transaction, accountMappings);

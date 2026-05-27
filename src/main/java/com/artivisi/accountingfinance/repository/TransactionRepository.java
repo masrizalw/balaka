@@ -110,4 +110,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     List<Transaction> findByStatusAndTransactionDateBeforeOrderByTransactionDateAsc(
             TransactionStatus status, LocalDate before);
+
+    List<Transaction> findBySourceDocumentTypeAndSourceDocumentIdOrderByTransactionDateAsc(
+            String sourceDocumentType, UUID sourceDocumentId);
 }

@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "transactions")
@@ -102,6 +103,14 @@ public class Transaction extends BaseEntity {
     @Size(max = 100, message = "Posted by must not exceed 100 characters")
     @Column(name = "posted_by", length = 100)
     private String postedBy;
+
+    // Generic link to the operational document that generated this transaction
+    // (e.g. INVOICE/BILL). One document may map to many transactions.
+    @Column(name = "source_document_type", length = 30)
+    private String sourceDocumentType;
+
+    @Column(name = "source_document_id")
+    private UUID sourceDocumentId;
 
     @JsonIgnore
     @Getter(AccessLevel.NONE)
