@@ -1,5 +1,6 @@
 package com.artivisi.accountingfinance.controller;
 
+import com.artivisi.accountingfinance.entity.ChartOfAccount;
 import com.artivisi.accountingfinance.entity.CompanyBankAccount;
 import com.artivisi.accountingfinance.util.FormUtils;
 import com.artivisi.accountingfinance.entity.CompanyConfig;
@@ -140,6 +141,12 @@ public class SettingsController {
 
         @Size(max = 50, message = "Industry must not exceed 50 characters")
         private String industry;
+
+        // Posting bridge accounts (resolved to ChartOfAccount in toEntity)
+        private UUID receivableAccountId;
+        private UUID payableAccountId;
+        private UUID outputTaxAccountId;
+        private UUID inputTaxAccountId;
     }
 
     @Getter
@@ -171,7 +178,15 @@ public class SettingsController {
     private CompanyConfig toEntity(CompanyConfigForm form) {
         CompanyConfig entity = new CompanyConfig();
         BeanUtils.copyProperties(form, entity);
+        entity.setReceivableAccount(resolveAccount(form.getReceivableAccountId()));
+        entity.setPayableAccount(resolveAccount(form.getPayableAccountId()));
+        entity.setOutputTaxAccount(resolveAccount(form.getOutputTaxAccountId()));
+        entity.setInputTaxAccount(resolveAccount(form.getInputTaxAccountId()));
         return entity;
+    }
+
+    private ChartOfAccount resolveAccount(UUID id) {
+        return id == null ? null : chartOfAccountService.findById(id);
     }
 
     private CompanyBankAccount toEntity(BankAccountForm form) {
@@ -190,6 +205,7 @@ public class SettingsController {
 
         model.addAttribute("config", config);
         model.addAttribute(ATTR_BANK_ACCOUNTS, bankAccounts);
+        model.addAttribute("postingAccounts", chartOfAccountService.findTransactableAccounts());
         model.addAttribute(ATTR_CURRENT_PAGE, PAGE_SETTINGS);
 
         return "settings/company";
@@ -206,6 +222,7 @@ public class SettingsController {
         if (bindingResult.hasErrors()) {
             List<CompanyBankAccount> bankAccounts = bankAccountService.findAll();
             model.addAttribute(ATTR_BANK_ACCOUNTS, bankAccounts);
+            model.addAttribute("postingAccounts", chartOfAccountService.findTransactableAccounts());
             model.addAttribute(ATTR_CURRENT_PAGE, PAGE_SETTINGS);
             return "settings/company";
         }

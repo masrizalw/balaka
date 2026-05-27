@@ -55,6 +55,10 @@ public class CompanyConfigService {
         existing.setSigningOfficerTitle(updatedConfig.getSigningOfficerTitle());
         existing.setCompanyLogoPath(updatedConfig.getCompanyLogoPath());
         existing.setIndustry(updatedConfig.getIndustry());
+        existing.setReceivableAccount(updatedConfig.getReceivableAccount());
+        existing.setPayableAccount(updatedConfig.getPayableAccount());
+        existing.setOutputTaxAccount(updatedConfig.getOutputTaxAccount());
+        existing.setInputTaxAccount(updatedConfig.getInputTaxAccount());
 
         return companyConfigRepository.save(existing);
     }

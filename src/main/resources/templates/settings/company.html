@@ -170,6 +170,50 @@
                     </div>
                 </div>
 
+                <!-- Posting Bridge Accounts: resolve AR/AP/PPN slots when invoices/bills post via the template engine -->
+                <div class="border-t pt-6 mt-6">
+                    <h3 class="text-md font-medium text-gray-900 mb-4">Akun Posting (Jurnal Otomatis)</h3>
+                    <p class="text-sm text-gray-500 mb-4">Akun ini dipakai saat invoice/tagihan membuat jurnal DRAFT lewat template (piutang, hutang, PPN).</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="receivableAccountId" class="block text-sm font-medium text-gray-700 mb-1">Piutang Usaha (AR)</label>
+                            <select id="receivableAccountId" th:field="*{receivableAccountId}"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+                                <option value="">-- Pilih Akun --</option>
+                                <option th:each="acc : ${postingAccounts}" th:value="${acc.id}"
+                                        th:text="|${acc.accountCode} - ${acc.accountName}|"></option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="payableAccountId" class="block text-sm font-medium text-gray-700 mb-1">Hutang Usaha (AP)</label>
+                            <select id="payableAccountId" th:field="*{payableAccountId}"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+                                <option value="">-- Pilih Akun --</option>
+                                <option th:each="acc : ${postingAccounts}" th:value="${acc.id}"
+                                        th:text="|${acc.accountCode} - ${acc.accountName}|"></option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="outputTaxAccountId" class="block text-sm font-medium text-gray-700 mb-1">PPN Keluaran</label>
+                            <select id="outputTaxAccountId" th:field="*{outputTaxAccountId}"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+                                <option value="">-- Pilih Akun --</option>
+                                <option th:each="acc : ${postingAccounts}" th:value="${acc.id}"
+                                        th:text="|${acc.accountCode} - ${acc.accountName}|"></option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="inputTaxAccountId" class="block text-sm font-medium text-gray-700 mb-1">PPN Masukan</label>
+                            <select id="inputTaxAccountId" th:field="*{inputTaxAccountId}"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500">
+                                <option value="">-- Pilih Akun --</option>
+                                <option th:each="acc : ${postingAccounts}" th:value="${acc.id}"
+                                        th:text="|${acc.accountCode} - ${acc.accountName}|"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Actions -->
                 <div class="flex items-center justify-end gap-3 pt-4 border-t">
                     <button type="submit" id="btn-save-company"

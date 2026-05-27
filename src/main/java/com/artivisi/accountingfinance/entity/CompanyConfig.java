@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(name = "company_config")
@@ -103,4 +104,21 @@ public class CompanyConfig extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_input_tax_account")
     private ChartOfAccount inputTaxAccount;
+
+    // Read-only id accessors for form binding (field-access entity ignores these for persistence).
+    public UUID getReceivableAccountId() {
+        return receivableAccount != null ? receivableAccount.getId() : null;
+    }
+
+    public UUID getPayableAccountId() {
+        return payableAccount != null ? payableAccount.getId() : null;
+    }
+
+    public UUID getOutputTaxAccountId() {
+        return outputTaxAccount != null ? outputTaxAccount.getId() : null;
+    }
+
+    public UUID getInputTaxAccountId() {
+        return inputTaxAccount != null ? inputTaxAccount.getId() : null;
+    }
 }
