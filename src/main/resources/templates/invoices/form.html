@@ -98,13 +98,29 @@
                     <div class="space-y-3">
                         <template x-for="(line, index) in lines" :key="index">
                             <div class="grid grid-cols-12 gap-2 items-start p-3 bg-gray-50 rounded-lg">
-                                <div class="col-span-3">
-                                    <label :for="'inv-lineProductId-' + index" class="block text-xs text-gray-500 mb-1">Produk/Jasa</label>
-                                    <select :id="'inv-lineProductId-' + index" :name="'lineProductId'" x-model="line.productId"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded text-sm">
-                                        <option value="">-- Pilih --</option>
-                                        <option th:each="p : ${products}" th:value="${p.id}" th:text="${p.name}"></option>
-                                    </select>
+                                <div class="col-span-3 relative">
+                                    <label :for="'inv-lineProductLabel-' + index" class="block text-xs text-gray-500 mb-1">Produk/Jasa</label>
+                                    <input type="text" :id="'inv-lineProductLabel-' + index"
+                                           x-model="line.productLabel"
+                                           @input.debounce.300ms="searchProducts(line)"
+                                           @focus="line.pickerOpen = true"
+                                           @click.away="line.pickerOpen = false"
+                                           autocomplete="off"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                                           placeholder="Ketik nama produk/jasa...">
+                                    <input type="hidden" :name="'lineProductId'" :value="line.productId">
+                                    <div x-show="line.pickerOpen &amp;&amp; line.productResults.length > 0"
+                                         class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-auto">
+                                        <template x-for="p in line.productResults" :key="p.id">
+                                            <button type="button"
+                                                    @click="selectProduct(line, p)"
+                                                    class="block w-full text-left px-3 py-2 text-sm hover:bg-primary-50">
+                                                <span class="font-medium" x-text="p.code"></span>
+                                                <span class="text-gray-500"> — </span>
+                                                <span x-text="p.name"></span>
+                                            </button>
+                                        </template>
+                                    </div>
                                 </div>
                                 <div class="col-span-2">
                                     <label :for="'inv-lineDescription-' + index" class="block text-xs text-gray-500 mb-1">Deskripsi *</label>
@@ -203,6 +219,9 @@
                             ? existingLines.map(function(l) {
                                 return {
                                     productId: l.productId || '',
+                                    productLabel: l.productLabel || '',
+                                    productResults: [],
+                                    pickerOpen: false,
                                     description: l.description || '',
                                     quantity: l.quantity || 1,
                                     unitPrice: l.unitPrice || 0,
@@ -212,7 +231,29 @@
                             })
                             : [],
                         addLine: function() {
-                            this.lines.push({ productId: '', description: '', quantity: 1, unitPrice: 0, taxRate: '', amount: 0 });
+                            this.lines.push({
+                                productId: '', productLabel: '', productResults: [], pickerOpen: false,
+                                description: '', quantity: 1, unitPrice: 0, taxRate: '', amount: 0
+                            });
+                        },
+                        searchProducts: function(line) {
+                            var q = encodeURIComponent(line.productLabel || '');
+                            fetch('/products/search?q=' + q, { headers: { 'Accept': 'application/json' } })
+                                .then(function(r) { return r.ok ? r.json() : []; })
+                                .then(function(data) { line.productResults = data; });
+                        },
+                        selectProduct: function(line, p) {
+                            line.productId = p.id;
+                            line.productLabel = (p.code ? p.code + ' - ' : '') + p.name;
+                            if (!line.description) {
+                                line.description = p.name;
+                            }
+                            if ((!line.unitPrice || Number.parseFloat(line.unitPrice) === 0) && p.sellingPrice) {
+                                line.unitPrice = p.sellingPrice;
+                                this.calcLine(line);
+                            }
+                            line.productResults = [];
+                            line.pickerOpen = false;
                         },
                         removeLine: function(index) {
                             this.lines.splice(index, 1);

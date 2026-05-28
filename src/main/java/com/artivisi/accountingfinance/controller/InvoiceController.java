@@ -372,7 +372,8 @@ public class InvoiceController {
     private void populateFormModel(Model model, List<InvoiceLine> lines) {
         model.addAttribute(ATTR_CLIENTS, clientService.findActiveClients());
         model.addAttribute(ATTR_PROJECTS, projectService.findActiveProjects());
-        model.addAttribute(ATTR_PRODUCTS, productService.findAllActive());
+        // Products fetched on-demand via GET /products/search by the line picker;
+        // we no longer dump the full catalog into the form (kept dropdowns ≤ 10 items).
         model.addAttribute(ATTR_CURRENT_PAGE, PAGE_INVOICES);
         model.addAttribute(ATTR_LINES, lines);
     }

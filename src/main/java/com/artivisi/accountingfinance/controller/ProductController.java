@@ -125,6 +125,33 @@ public class ProductController {
         return form;
     }
 
+    /**
+     * Typeahead search endpoint for the invoice-line product picker.
+     * Returns at most 10 active products (with a salesAccount configured) matching
+     * the search term, so a dropdown never grows past a usable size.
+     */
+    @org.springframework.web.bind.annotation.GetMapping("/search")
+    @org.springframework.web.bind.annotation.ResponseBody
+    @PreAuthorize("isAuthenticated()")
+    public java.util.List<java.util.Map<String, Object>> search(
+            @RequestParam(value = "q", required = false) String q) {
+        var page = productService.findByFilters(
+                q == null ? "" : q, null, true,
+                org.springframework.data.domain.PageRequest.of(0, 10,
+                        org.springframework.data.domain.Sort.by("name")));
+        java.util.List<java.util.Map<String, Object>> results = new java.util.ArrayList<>();
+        for (Product p : page.getContent()) {
+            if (p.getSalesAccount() == null) continue;
+            results.add(java.util.Map.of(
+                    "id", p.getId().toString(),
+                    "code", p.getCode() == null ? "" : p.getCode(),
+                    "name", p.getName() == null ? "" : p.getName(),
+                    "sellingPrice", p.getSellingPrice() == null
+                            ? java.math.BigDecimal.ZERO : p.getSellingPrice()));
+        }
+        return results;
+    }
+
     @GetMapping
     public String list(
             @RequestParam(required = false) String search,
