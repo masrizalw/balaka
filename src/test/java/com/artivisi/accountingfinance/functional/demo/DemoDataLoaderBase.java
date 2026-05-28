@@ -636,6 +636,20 @@ public abstract class DemoDataLoaderBase extends PlaywrightTestBase {
         page.locator("#usefulLifeMonths").fill(parts[4]);
         page.locator("#residualValue").fill(parts.length > 5 ? parts[5] : "0");
 
+        // Funding account is required; pick the first concrete option (skip the placeholder).
+        var fundingSelect = page.locator("#fundingAccount");
+        var fundingOptions = fundingSelect.locator("option").all();
+        for (var option : fundingOptions) {
+            String value = option.getAttribute("value");
+            if (value != null && !value.isBlank()) {
+                fundingSelect.selectOption(value);
+                break;
+            }
+        }
+
+        // Demo assets auto-post their depreciation so balances reflect the periods.
+        page.locator("#autoPost").check();
+
         tutorialScreenshot("asset-form");
 
         page.locator("#btn-simpan").click();
