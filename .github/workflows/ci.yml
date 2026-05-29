@@ -112,6 +112,14 @@ jobs:
           name: jacoco-report
           path: target/site/jacoco/
 
+      - name: Upload Playwright debug artifacts (screenshots + HTML on navigation failures)
+        uses: actions/upload-artifact@v5
+        if: failure()
+        with:
+          name: playwright-debug
+          path: target/playwright-debug/
+          if-no-files-found: ignore
+
       - name: Upload ZAP DAST reports
         uses: actions/upload-artifact@v5
         if: always()

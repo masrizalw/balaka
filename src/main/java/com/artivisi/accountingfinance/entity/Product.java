@@ -33,6 +33,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Product {
 
     @Id

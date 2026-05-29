@@ -30,6 +30,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @SQLRestriction("deleted_at IS NULL")
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ChartOfAccount extends BaseEntity {
 
     @NotBlank(message = "Kode akun harus diisi")

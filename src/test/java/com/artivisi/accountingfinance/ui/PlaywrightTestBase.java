@@ -108,7 +108,37 @@ public abstract class PlaywrightTestBase {
     }
 
     protected void navigateTo(String path) {
-        page.navigate(baseUrl() + path);
+        try {
+            page.navigate(baseUrl() + path);
+        } catch (Exception e) {
+            captureNavigationFailureArtifacts(path, e);
+            throw e;
+        }
+    }
+
+    /**
+     * On navigation failure (typically a 5s timeout), capture a screenshot, the
+     * current HTML, and the resolved URL so we can see what the page was actually
+     * doing when it stalled. Artifacts land under target/playwright-debug/ and are
+     * uploaded by CI on failure.
+     */
+    private void captureNavigationFailureArtifacts(String path, Exception cause) {
+        try {
+            String slug = path.replaceAll("[^A-Za-z0-9._-]", "_");
+            if (slug.length() > 80) slug = slug.substring(0, 80);
+            String stamp = String.valueOf(System.currentTimeMillis());
+            Path dir = Paths.get("target", "playwright-debug");
+            java.nio.file.Files.createDirectories(dir);
+            Path png = dir.resolve("navfail-" + slug + "-" + stamp + ".png");
+            Path html = dir.resolve("navfail-" + slug + "-" + stamp + ".html");
+            page.screenshot(new Page.ScreenshotOptions().setPath(png).setFullPage(true));
+            java.nio.file.Files.writeString(html, page.content());
+            System.err.println("NAVFAIL screenshot=" + png + " html=" + html
+                    + " url=" + page.url() + " cause=" + cause.getClass().getSimpleName()
+                    + " message=" + cause.getMessage());
+        } catch (Exception ignored) {
+            // Don't let debug capture mask the original failure.
+        }
     }
 
     protected void login(String username, String password) {
