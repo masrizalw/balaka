@@ -90,6 +90,8 @@ Kolom yang ditampilkan:
 | Kode Aset | Kode unik (contoh: AST-2025-001) |
 | Nama Aset | Deskripsi aset |
 | Kategori | Pilih dari dropdown |
+| Sumber Dana Pembelian | **Wajib.** Akun bank/kas (jika dibayar tunai) atau hutang vendor (jika kredit) yang akan dikreditkan pada jurnal perolehan. Combobox — ketik kode/nama akun, pilih dari hasil. |
+| Posting penyusutan otomatis | *Opsional, default tidak dicentang.* Jika dicentang, scheduler bulanan langsung mem-posting jurnal penyusutan; jika tidak, jurnal penyusutan tetap **PENDING** untuk persetujuan staf akuntansi. |
 | Tanggal Perolehan | Tanggal pembelian |
 | Harga Perolehan | Nilai beli (termasuk biaya instalasi jika ada) |
 | Nilai Residu | Estimasi nilai jual akhir (biasanya 0 untuk pajak) |
@@ -100,10 +102,14 @@ Kolom yang ditampilkan:
 
 ### Jurnal yang Terbentuk (saat pembelian)
 
+Form aset membuat jurnal perolehan sebagai **DRAFT** otomatis lewat template "Pembelian Aset Tetap". Slot debit memakai akun aset dari kategori, slot kredit memakai **Sumber Dana Pembelian** yang dipilih operator.
+
 ```
 Dr. Aset Tetap - [Kategori]    xxx
-    Cr. Kas/Bank                   xxx
+    Cr. [Sumber Dana Pembelian]    xxx
 ```
+
+Status awal: **DRAFT** — staf akuntansi membuka transaksi dan klik **Posting** setelah verifikasi. Tidak ada posting otomatis pada saat pencatatan aset; pemisahan ini menjaga kontrol internal antara operasional (mencatat) dan akuntansi (mem-posting). Konsep yang sama berlaku untuk invoice, tagihan vendor, dan transaksi inventory — lihat [DRAFT-by-default](#draft-by-default) di bab Faktur & Tagihan.
 
 ---
 
@@ -123,12 +129,19 @@ Tabel menampilkan:
 
 ### Proses Depresiasi Bulanan
 
-Sistem menghitung depresiasi secara otomatis setiap bulan. Jurnal yang dibuat:
+Scheduler bulanan menghitung depresiasi otomatis. Jurnal yang dibuat:
 
 ```
 Dr. Beban Penyusutan              xxx
     Cr. Akumulasi Penyusutan          xxx
 ```
+
+Status entri ditentukan oleh flag **Posting penyusutan otomatis** pada aset:
+
+- Centang dicentang → scheduler langsung mem-posting (status **POSTED**), saldo GL berubah pada hari scheduler berjalan.
+- Centang tidak dicentang (default) → entri dibuat dengan status **PENDING**, menunggu staf akuntansi review. Status PENDING tidak mempengaruhi laporan keuangan.
+
+Pendekatan default (PENDING) sesuai prinsip [DRAFT-by-default](16-faktur-tagihan.md#draft-by-default): operasi mencatat, akuntansi yang mem-posting. Centang opt-in dipakai untuk aset yang nilainya stabil dan tidak perlu review tiap bulan.
 
 ### Contoh Perhitungan (Garis Lurus)
 

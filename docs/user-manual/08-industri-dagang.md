@@ -148,7 +148,7 @@ Menu **Inventori** > **Transaksi** > **Pembelian Baru**
 
 ![Detail Pembelian iPhone](screenshots/seller/inv-01-purchase-result.png)
 
-**Jurnal Otomatis:**
+**Jurnal Otomatis (DRAFT):**
 ```
 Dr. 1.1.20 Persediaan Barang Dagang  Rp 150.000.000
     Cr. 1.1.01 Bank BCA                  Rp 150.000.000
@@ -248,7 +248,7 @@ Sistem otomatis ambil dari layer pembelian:
 
 ![Detail Penjualan iPhone](screenshots/seller/inv-05-sale-result.png)
 
-**Jurnal Otomatis (2 entries):**
+**Jurnal Otomatis (2 entries, DRAFT):**
 
 **Entry 1: Revenue Recognition**
 ```

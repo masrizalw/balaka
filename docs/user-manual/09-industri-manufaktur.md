@@ -271,7 +271,10 @@ Unit Cost = Total Component Cost / Output Quantity
 Unit Cost = Rp 106.920 / 24 pcs = Rp 4.455/pcs
 ```
 
-**Jurnal Otomatis:**
+**Jurnal Otomatis (DRAFT):**
+
+Sistem membuat jurnal DRAFT lewat template "Penyelesaian Produksi" — satu DRAFT per baris BOM, dengan akun persediaan diambil dari master Produk (slot Inventory Account). Status awal DRAFT (sesuai prinsip [DRAFT-by-default](16-faktur-tagihan.md#draft-by-default)); staf akuntansi mem-posting setelah review unit cost.
+
 ```
 Dr. 1.1.21 Persediaan Barang Jadi - Roti    Rp 106.920
     Cr. 1.1.20 Persediaan Bahan Baku - Roti    Rp 106.920
@@ -320,7 +323,7 @@ Data:
 - **Total:** Rp 600.000
 - **Referensi:** PO-001
 
-**Jurnal Otomatis:**
+**Jurnal Otomatis (DRAFT):**
 ```
 Dr. 1.1.20 Persediaan Bahan Baku - Roti  Rp 600.000
     Cr. 1.1.01 Bank BCA                      Rp 600.000
@@ -349,7 +352,7 @@ Data:
 **Sistem hitung HPP otomatis (FIFO/Weighted Average):**
 - 15 pcs @ Rp 4.455 = Rp 66.825
 
-**Jurnal Otomatis:**
+**Jurnal Otomatis (DRAFT):**
 ```
 Dr. 1.1.01 Bank BCA                          Rp 375.000
     Cr. 4.1.02 Pendapatan Penjualan Roti         Rp 375.000

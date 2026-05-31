@@ -2,6 +2,30 @@
 
 Panduan lengkap untuk pengelolaan faktur (invoice) ke klien, tagihan dari vendor, pelacakan pembayaran, laporan umur piutang/hutang, dan laporan per klien/vendor.
 
+## DRAFT-by-default
+
+Balaka memisahkan **siapa mencatat** dari **siapa mem-posting ke buku besar**. Form-form di luar modul jurnal manual (faktur, tagihan vendor, perolehan aset, penyusutan, penyelesaian produksi BOM, transaksi inventory) tidak pernah memposting jurnal langsung. Mereka membuat **jurnal DRAFT** lewat template yang sudah dikonfigurasi, kemudian staf akuntansi membuka jurnal tersebut dan klik **Posting** setelah review.
+
+```
+Operasional                Akuntansi
+  Kirim faktur     ──►     Buka DRAFT
+  Setujui tagihan  ──►     Verifikasi
+  Catat aset       ──►     Klik "Posting"
+                                │
+                                ▼
+                          Saldo GL berubah
+```
+
+Konsekuensi praktis:
+
+- Status jurnal yang baru dibuat selalu **DRAFT** — tidak mempengaruhi laporan keuangan sampai diposting.
+- Bila jurnal salah, staf akuntansi cukup hapus DRAFT (atau kirim balik komentar) tanpa perlu jurnal koreksi.
+- Beberapa fitur menyediakan opt-in (`autoPost`) untuk skenario tertentu — misal aset tetap dengan penyusutan stabil. Default tetap DRAFT.
+
+Prasyarat: empat slot **Akun Posting (Jurnal Otomatis)** harus terisi di Pengaturan Perusahaan — Piutang, Hutang, PPN Keluaran, PPN Masukan. Lihat [Akun Posting Jurnal Otomatis](01-setup-awal.md#akun-posting-jurnal-otomatis).
+
+---
+
 ## Faktur (Invoice)
 
 ### Konsep
@@ -29,28 +53,40 @@ DRAFT → SENT → PARTIAL → PAID
 Buka menu **Proyek** > **Faktur** > **Faktur Baru**.
 
 Isi data faktur:
-- **Klien:** Pilih dari daftar klien
-- **Tanggal Faktur:** Tanggal penerbitan
-- **Tanggal Jatuh Tempo:** Batas waktu pembayaran
-- **Proyek** (opsional): Kaitkan ke proyek tertentu
+- **Klien:** Combobox — ketik kode/nama klien, pilih dari hasil pencarian (maksimum 10).
+- **Tanggal Faktur:** Tanggal penerbitan.
+- **Tanggal Jatuh Tempo:** Batas waktu pembayaran.
+- **Proyek** (opsional): Kaitkan ke proyek tertentu.
 
 Tambahkan line item:
-- **Deskripsi:** Keterangan jasa/barang
-- **Quantity:** Jumlah
-- **Harga Satuan:** Harga per unit
-- **Total:** Dihitung otomatis (qty x harga satuan)
+- **Produk/Jasa:** Combobox — ketik kode/nama produk, pilih dari hasil. Pilihan ini menentukan akun pendapatan yang dipakai pada DRAFT jurnal pengakuan pendapatan (lihat `Sales Account` pada master Produk).
+- **Deskripsi:** Keterangan tambahan (terisi otomatis dari nama produk, bisa diubah).
+- **Quantity:** Jumlah.
+- **Harga Satuan:** Harga per unit (terisi otomatis dari Harga Jual produk jika kosong).
+- **PPN %:** Tarif PPN baris (kosong = tanpa PPN).
+- **Total:** Dihitung otomatis (qty × harga satuan + PPN).
 
-Klik **Simpan** untuk menyimpan sebagai DRAFT.
+Klik **Simpan** untuk menyimpan sebagai DRAFT. Pada tahap ini belum ada jurnal — faktur masih bisa diedit.
 
 ![Faktur Baru](screenshots/10-invoice-created.png)
 
 ### Mengirim Faktur
 
-Dari halaman detail faktur, klik **Kirim** untuk mengubah status dari DRAFT ke SENT. Faktur yang sudah dikirim tidak bisa diedit.
+Dari halaman detail faktur, klik **Kirim**:
+
+1. Status faktur berubah dari DRAFT ke SENT — faktur tidak bisa diedit lagi.
+2. Sistem membuat **jurnal DRAFT** lewat template "Pengakuan Pendapatan Invoice". Jurnal mengikuti pola R2: satu DRAFT per akun pendapatan yang muncul di line items (line yang share `Sales Account` digabung jadi satu jurnal).
+3. Jurnal tetap berstatus DRAFT — staf akuntansi membuka dan mem-posting setelah review.
+
+```
+Dr. Piutang Usaha                     xxx        (dari Akun Posting → Piutang Usaha)
+    Cr. Pendapatan [per produk]           xxx    (dari Produk.Sales Account)
+    Cr. PPN Keluaran                      xxx    (dari Akun Posting → PPN Keluaran, jika ada)
+```
+
+Faktur masuk ke laporan umur piutang segera setelah dikirim, terlepas dari status jurnal-nya. Jurnal yang masih DRAFT tidak mempengaruhi saldo GL — jadi laporan keuangan baru berubah setelah staf akuntansi mem-posting.
 
 ![Faktur Terkirim](screenshots/10-invoice-sent.png)
-
-Setelah dikirim, faktur masuk ke laporan umur piutang dan siap menerima pembayaran.
 
 ---
 
@@ -81,20 +117,35 @@ DRAFT → APPROVED → PARTIAL → PAID
 Buka menu **Pembelian** > **Tagihan** > **Tagihan Baru**.
 
 Isi data:
-- **Vendor:** Pilih dari daftar vendor
-- **Tanggal Tagihan:** Tanggal penerbitan oleh vendor
-- **Tanggal Jatuh Tempo:** Batas pembayaran
-- **Nomor Referensi Vendor** (opsional): Nomor tagihan dari vendor
+- **Vendor:** Combobox — ketik kode/nama vendor, pilih dari hasil.
+- **Tanggal Tagihan:** Tanggal penerbitan oleh vendor.
+- **Tanggal Jatuh Tempo:** Batas pembayaran.
+- **Nomor Referensi Vendor** (opsional): Nomor tagihan dari vendor.
 
-Tambahkan line item seperti pada faktur.
+Tambahkan line item:
+- **Deskripsi:** Keterangan barang/jasa yang dibeli.
+- **Akun Beban:** Combobox per baris — ketik kode/nama akun beban. Pilihan ini menentukan akun yang didebit pada DRAFT jurnal pengeluaran (sub-bagan dari kelas Beban / 5.x atau Aset / 1.x untuk pembelian persediaan).
+- **Quantity, Harga Satuan, PPN %:** Sama seperti faktur.
+
+Klik **Simpan** — tagihan tersimpan sebagai DRAFT, belum ada jurnal.
 
 ### Menyetujui Tagihan
 
-Dari halaman detail tagihan, klik **Setujui** untuk mengubah status dari DRAFT ke APPROVED.
+Dari halaman detail tagihan, klik **Setujui**:
+
+1. Status tagihan berubah dari DRAFT ke APPROVED.
+2. Sistem membuat **jurnal DRAFT** lewat template "Tagihan Vendor". Pola R2 berlaku: satu DRAFT per akun beban yang muncul di line items.
+3. Jurnal tetap DRAFT — staf akuntansi mem-posting setelah review.
+
+```
+Dr. [Akun Beban per line]              xxx     (dari BillLine.Akun Beban)
+Dr. PPN Masukan                        xxx     (dari Akun Posting → PPN Masukan, jika ada)
+    Cr. Hutang Usaha                       xxx (dari Akun Posting → Hutang Usaha)
+```
 
 ![Tagihan Disetujui](screenshots/10-bill-approved.png)
 
-Tagihan yang disetujui masuk ke laporan umur hutang dan siap menerima pembayaran.
+Tagihan yang disetujui masuk ke laporan umur hutang segera, terlepas dari status jurnal-nya.
 
 ---
 

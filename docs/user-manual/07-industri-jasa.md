@@ -111,7 +111,7 @@ Dari halaman detail, Anda dapat:
 
 ### Mengaktifkan/Menonaktifkan Klien
 
-Klien yang tidak aktif tetap tersimpan di database tetapi tidak muncul di dropdown pemilihan klien. Untuk mengubah status:
+Klien yang tidak aktif tetap tersimpan di database tetapi tidak muncul di hasil pencarian combobox pemilihan klien (form invoice, form proyek, dll). Untuk mengubah status:
 
 1. Buka halaman detail klien
 2. Klik **Nonaktifkan** (untuk menonaktifkan) atau **Aktifkan** (untuk mengaktifkan kembali)
@@ -151,7 +151,7 @@ Klik pada proyek untuk melihat detail. Informasi yang ditampilkan:
 2. Isi:
    - Kode proyek
    - Nama proyek
-   - Klien (pilih dari dropdown)
+   - Klien (combobox — ketik kode/nama, pilih hasil pencarian)
    - Nilai kontrak
    - Tanggal mulai & target selesai
    - Deskripsi

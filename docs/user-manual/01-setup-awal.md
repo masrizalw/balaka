@@ -122,6 +122,28 @@ Lihat [Referensi Template](12-lampiran-template.md) untuk daftar lengkap templat
 
 ---
 
+## Akun Posting Jurnal Otomatis
+
+Fitur invoice (faktur penjualan), bill (tagihan vendor), dan transaksi serupa membuat **jurnal DRAFT** secara otomatis lewat template (lihat [Faktur & Tagihan](16-faktur-tagihan.md)). Template tersebut perlu tahu akun spesifik yang dipakai pada tenant ini — Piutang, Hutang, dan dua slot PPN. Pemetaan ini dikonfigurasi sekali di **Pengaturan → Profil Perusahaan**, bagian **Akun Posting (Jurnal Otomatis)**.
+
+| Slot | Dipakai oleh | Contoh akun |
+|------|--------------|-------------|
+| Piutang Usaha (AR) | Pengakuan pendapatan invoice (debit) | 1.1.10 Piutang Usaha |
+| Hutang Usaha (AP) | Pengakuan tagihan vendor (kredit) | 2.1.10 Hutang Usaha |
+| PPN Keluaran | Komponen PPN pada invoice (kredit) | 2.1.30 PPN Keluaran |
+| PPN Masukan | Komponen PPN pada tagihan vendor (debit) | 1.1.40 PPN Masukan |
+
+Empat slot tersebut **wajib** terisi sebelum invoice dapat dikirim atau tagihan disetujui — proses bridge ke jurnal akan gagal dengan pesan "Akun … belum dikonfigurasi" jika slot kosong.
+
+Pencarian akun pada form ini memakai *combobox*: ketik kode atau nama akun, kemudian klik hasil yang muncul (maksimum 10 hasil). Daftar akun lengkap tidak ditampilkan supaya tetap dapat dipakai meskipun bagan akun besar.
+
+### Kapan diisi
+
+- **Setup awal tenant baru:** isi langsung setelah import seed data. Seed industri standar (`it-service`, `online-seller`, `coffee-shop`, `campus`) sudah menyertakan akun-akun ini di bagan akun — tinggal memilih.
+- **Tenant lama:** jika sebelum upgrade slot kosong, akan ada error saat pertama kali mengirim invoice. Buka **Pengaturan → Profil Perusahaan** dan lengkapi.
+
+---
+
 ## User Management
 
 ### Melihat Daftar Pengguna

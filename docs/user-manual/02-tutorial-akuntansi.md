@@ -414,10 +414,10 @@ Untuk transaksi yang tidak cocok dengan template yang ada, gunakan fitur **Jurna
    - **Kategori**: Pilih jenis jurnal (Penutup, Penyesuaian, Pembuka, Koreksi) — opsional
    - **Deskripsi**: Keterangan jurnal
 4. Tambahkan baris jurnal:
-   - Pilih **Akun** dari dropdown
-   - Isi nominal di kolom **Debit** atau **Kredit**
-   - Klik **Tambah Baris** untuk menambah baris
-5. Pastikan indikator menunjukkan **Jurnal seimbang** (total debit = total kredit)
+   - **Akun**: combobox per baris — ketik kode atau nama akun, klik hasil pencarian (maksimum 10 hasil per query).
+   - Isi nominal di kolom **Debit** atau **Kredit**. Mengisi salah satu otomatis menonaktifkan kolom yang lain pada baris yang sama — sebuah baris adalah debit-XOR-kredit.
+   - Klik **Tambah Baris** untuk menambah baris (minimum 2 baris).
+5. Pastikan indikator menunjukkan **Jurnal seimbang** (total debit = total kredit).
 
 ![Form Jurnal Manual Terisi](screenshots/journal-entry/form-filled.png)
 
