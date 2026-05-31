@@ -22,7 +22,7 @@ Konsekuensi praktis:
 - Bila jurnal salah, staf akuntansi cukup hapus DRAFT (atau kirim balik komentar) tanpa perlu jurnal koreksi.
 - Beberapa fitur menyediakan opt-in (`autoPost`) untuk skenario tertentu — misal aset tetap dengan penyusutan stabil. Default tetap DRAFT.
 
-Prasyarat: empat slot **Akun Posting (Jurnal Otomatis)** harus terisi di Pengaturan Perusahaan — Piutang, Hutang, PPN Keluaran, PPN Masukan. Lihat [Akun Posting Jurnal Otomatis](01-setup-awal.md#akun-posting-jurnal-otomatis).
+Prasyarat: empat slot **Akun Posting (Jurnal Otomatis)** harus terisi di Pengaturan Perusahaan — Piutang, Hutang, PPN Keluaran, PPN Masukan. Lihat [Akun Posting Jurnal Otomatis](01-setup-awal.md#akun-posting).
 
 ---
 

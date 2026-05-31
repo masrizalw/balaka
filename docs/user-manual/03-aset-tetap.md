@@ -109,7 +109,7 @@ Dr. Aset Tetap - [Kategori]    xxx
     Cr. [Sumber Dana Pembelian]    xxx
 ```
 
-Status awal: **DRAFT** — staf akuntansi membuka transaksi dan klik **Posting** setelah verifikasi. Tidak ada posting otomatis pada saat pencatatan aset; pemisahan ini menjaga kontrol internal antara operasional (mencatat) dan akuntansi (mem-posting). Konsep yang sama berlaku untuk invoice, tagihan vendor, dan transaksi inventory — lihat [DRAFT-by-default](#draft-by-default) di bab Faktur & Tagihan.
+Status awal: **DRAFT** — staf akuntansi membuka transaksi dan klik **Posting** setelah verifikasi. Tidak ada posting otomatis pada saat pencatatan aset; pemisahan ini menjaga kontrol internal antara operasional (mencatat) dan akuntansi (mem-posting). Konsep yang sama berlaku untuk invoice, tagihan vendor, dan transaksi inventory — lihat [DRAFT-by-default](16-faktur-tagihan.md#draft-by-default) di bab Faktur & Tagihan.
 
 ---
 

@@ -78,6 +78,7 @@ public class UserManualGenerator {
             new SectionGroup("setup-awal", "Setup Awal & Administrasi", "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z", List.of(
                 new Section("setup-awal", "Setup Awal", "01-setup-awal.md", List.of("login", "dashboard", "accounts-list", "accounts-form")),
                 new Section("import-seed", "Import Seed Data", "01-setup-awal.md", List.of()),
+                new Section("akun-posting", "Akun Posting Jurnal Otomatis", "01-setup-awal.md", List.of()),
                 new Section("user-management", "User Management", "01-setup-awal.md", List.of("users-list", "users-form", "settings/devices")),
                 new Section("telegram-setup", "Telegram Integration", "01-setup-awal.md", List.of())
             )),
@@ -208,6 +209,7 @@ public class UserManualGenerator {
 
             // 16. FAKTUR & TAGIHAN
             new SectionGroup("faktur-tagihan", "Faktur & Tagihan", "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z", List.of(
+                new Section("draft-by-default", "DRAFT-by-default", "16-faktur-tagihan.md", List.of()),
                 new Section("faktur-invoice", "Faktur (Invoice)", "16-faktur-tagihan.md", List.of("10-invoice-created", "10-invoice-sent")),
                 new Section("tagihan-vendor", "Tagihan Vendor (Bill)", "16-faktur-tagihan.md", List.of("10-bill-approved")),
                 new Section("pelacakan-pembayaran", "Pelacakan Pembayaran", "16-faktur-tagihan.md", List.of("10-invoice-partial-payment", "10-invoice-paid", "10-bill-payment")),
