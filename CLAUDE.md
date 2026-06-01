@@ -127,7 +127,7 @@ User → Controller (MVC) → Service → Repository → PostgreSQL
 
 ## Current Release
 
-**2026.05-RELEASE** tagged. See `docs/releases/2026.05-RELEASE.md` for release notes.
+**2026.06-RELEASE** tagged. See `docs/releases/2026.06-RELEASE.md` for release notes.
 
 ## Current Focus
 
