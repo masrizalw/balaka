@@ -72,7 +72,11 @@ public abstract class PlaywrightTestBase {
                 .setViewportSize(1920, 1080)
                 .setLocale("id-ID"));
         page = context.newPage();
-        page.setDefaultTimeout(5000);
+        // 5s is enough when the JVM is fresh, but late in a full-suite run up to 32
+        // cached Spring contexts (each with its own PostgreSQL container, Tomcat, and
+        // schedulers) share the machine and page loads jitter past it. 15s only delays
+        // failure reporting; passing tests are unaffected.
+        page.setDefaultTimeout(15000);
 
         // Capture browser console errors for debugging test failures
         page.onConsoleMessage(msg -> {
