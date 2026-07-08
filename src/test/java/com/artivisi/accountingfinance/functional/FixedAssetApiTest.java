@@ -2,6 +2,7 @@ package com.artivisi.accountingfinance.functional;
 
 import com.artivisi.accountingfinance.functional.service.ServiceTestDataInitializer;
 import com.artivisi.accountingfinance.repository.ChartOfAccountRepository;
+import com.artivisi.accountingfinance.repository.FixedAssetRepository;
 import com.artivisi.accountingfinance.repository.TransactionRepository;
 import com.artivisi.accountingfinance.ui.PlaywrightTestBase;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -42,6 +43,9 @@ class FixedAssetApiTest extends PlaywrightTestBase {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    private FixedAssetRepository fixedAssetRepository;
+
     @BeforeEach
     void setUp() throws Exception {
         objectMapper = new ObjectMapper();
@@ -58,6 +62,11 @@ class FixedAssetApiTest extends PlaywrightTestBase {
         if (apiContext != null) {
             apiContext.dispose();
         }
+        // Remove assets registered by this class. Linked assets keep an FK to their
+        // purchase transaction, which would break later tests that wipe transactions.
+        fixedAssetRepository.deleteAll(fixedAssetRepository.findAll().stream()
+                .filter(a -> a.getAssetCode().startsWith("API-"))
+                .toList());
     }
 
     @Test

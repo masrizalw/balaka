@@ -16,6 +16,7 @@ import com.artivisi.accountingfinance.repository.ChartOfAccountRepository;
 import com.artivisi.accountingfinance.repository.DraftTransactionRepository;
 import com.artivisi.accountingfinance.repository.JournalEntryRepository;
 import com.artivisi.accountingfinance.repository.JournalTemplateRepository;
+import com.artivisi.accountingfinance.repository.FixedAssetRepository;
 import com.artivisi.accountingfinance.repository.RecurringTransactionLogRepository;
 import com.artivisi.accountingfinance.repository.TransactionRepository;
 import com.artivisi.accountingfinance.ui.PlaywrightTestBase;
@@ -73,6 +74,9 @@ class ServiceReportsTest extends PlaywrightTestBase {
     @Autowired
     private RecurringTransactionLogRepository recurringTransactionLogRepository;
 
+    @Autowired
+    private FixedAssetRepository fixedAssetRepository;
+
     // Page Objects
     private TrialBalancePage trialBalancePage;
     private IncomeStatementPage incomeStatementPage;
@@ -94,6 +98,9 @@ class ServiceReportsTest extends PlaywrightTestBase {
         // Clear any existing transactions (in case another test created them).
         // Must delete dependents first to satisfy FK constraints.
         // recurring_transaction_logs.id_transaction has no ON DELETE CASCADE.
+        // fixed_assets.id_purchase_transaction has no ON DELETE CASCADE either;
+        // assets registered by FixedAssetApiTest may link posted purchase journals.
+        fixedAssetRepository.deleteAll();
         recurringTransactionLogRepository.deleteAll();
         draftTransactionRepository.deleteAll();
         journalEntryRepository.deleteAll();
