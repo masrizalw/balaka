@@ -5,11 +5,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Max;
@@ -22,7 +17,6 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.UUID;
 
 @Entity
 @Table(name = "fiscal_periods", uniqueConstraints = {
@@ -31,12 +25,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class FiscalPeriod {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+public class FiscalPeriod extends TimestampedEntity {
 
     @NotNull(message = "Tahun wajib diisi")
     @Min(value = 2000, message = "Tahun minimal 2000")
@@ -68,24 +57,6 @@ public class FiscalPeriod {
 
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 
     public boolean isOpen() {
         return status == FiscalPeriodStatus.OPEN;

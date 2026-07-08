@@ -1,21 +1,17 @@
 package com.artivisi.accountingfinance.entity;
 
 import com.artivisi.accountingfinance.enums.InvoiceStatus;
+import com.artivisi.accountingfinance.util.DisplayLabels;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -36,12 +32,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Invoice {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+public class Invoice extends TimestampedEntity {
 
     @Size(max = 50, message = "Nomor invoice maksimal 50 karakter")
     @Column(name = "invoice_number", nullable = false, unique = true, length = 50)
@@ -104,24 +95,6 @@ public class Invoice {
     @OrderBy("paymentDate ASC")
     private List<InvoicePayment> payments = new ArrayList<>();
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
     public boolean isDraft() {
         return status == InvoiceStatus.DRAFT;
     }
@@ -168,12 +141,7 @@ public class Invoice {
      */
     public String getClientLabel() {
         if (client == null) return "";
-        String code = client.getCode() == null ? "" : client.getCode();
-        String name = client.getName() == null ? "" : client.getName();
-        if (code.isEmpty() && name.isEmpty()) return "";
-        if (code.isEmpty()) return name;
-        if (name.isEmpty()) return code;
-        return code + " - " + name;
+        return DisplayLabels.codeName(client.getCode(), client.getName());
     }
 
     public void recalculateFromLines() {

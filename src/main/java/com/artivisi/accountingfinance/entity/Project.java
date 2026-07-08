@@ -1,6 +1,7 @@
 package com.artivisi.accountingfinance.entity;
 
 import com.artivisi.accountingfinance.enums.ProjectStatus;
+import com.artivisi.accountingfinance.util.DisplayLabels;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -141,11 +142,6 @@ public class Project {
      */
     public String getClientLabel() {
         if (client == null) return "";
-        String clientCode = client.getCode() == null ? "" : client.getCode();
-        String clientName = client.getName() == null ? "" : client.getName();
-        if (clientCode.isEmpty() && clientName.isEmpty()) return "";
-        if (clientCode.isEmpty()) return clientName;
-        if (clientName.isEmpty()) return clientCode;
-        return clientCode + " - " + clientName;
+        return DisplayLabels.codeName(client.getCode(), client.getName());
     }
 }

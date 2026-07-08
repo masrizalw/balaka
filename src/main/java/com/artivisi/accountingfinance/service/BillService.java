@@ -222,10 +222,17 @@ public class BillService {
             variables.put("ppnAmount", ppnAmount);
             variables.put("apAmount", apAmount);
 
-            documentPostingService.createDraftFromTemplate(
-                    null, "Tagihan Vendor", bill.getBillDate(),
-                    "Tagihan " + bill.getBillNumber() + " - " + group.getValue().getAccountName(),
-                    apAmount, hints, variables, "system", "BILL", bill.getId());
+            documentPostingService.createDraftFromTemplate(DocumentPostingService.DraftRequest.builder()
+                    .templateName("Tagihan Vendor")
+                    .date(bill.getBillDate())
+                    .description("Tagihan " + bill.getBillNumber() + " - " + group.getValue().getAccountName())
+                    .amount(apAmount)
+                    .hintToAccount(hints)
+                    .variables(variables)
+                    .createdBy("system")
+                    .sourceDocumentType("BILL")
+                    .sourceDocumentId(bill.getId())
+                    .build());
         }
     }
 

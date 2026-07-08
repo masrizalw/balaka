@@ -186,11 +186,17 @@ public class ProductionOrderService {
             hints.put("PERSEDIAAN_BAHAN", rawMaterialAccount.getId());
             java.util.Map<String, BigDecimal> vars = new java.util.HashMap<>();
             vars.put("componentCost", outTx.getTotalCost());
-            documentPostingService.createDraftFromTemplate(
-                    null, "Penyelesaian Produksi", order.getOrderDate(),
-                    "Produksi " + order.getOrderNumber() + " - " + line.getComponent().getName(),
-                    outTx.getTotalCost(), hints, vars, getCurrentUsername(),
-                    "PRODUCTION_ORDER", order.getId());
+            documentPostingService.createDraftFromTemplate(DocumentPostingService.DraftRequest.builder()
+                    .templateName("Penyelesaian Produksi")
+                    .date(order.getOrderDate())
+                    .description("Produksi " + order.getOrderNumber() + " - " + line.getComponent().getName())
+                    .amount(outTx.getTotalCost())
+                    .hintToAccount(hints)
+                    .variables(vars)
+                    .createdBy(getCurrentUsername())
+                    .sourceDocumentType("PRODUCTION_ORDER")
+                    .sourceDocumentId(order.getId())
+                    .build());
         }
 
         // Calculate unit cost for finished goods

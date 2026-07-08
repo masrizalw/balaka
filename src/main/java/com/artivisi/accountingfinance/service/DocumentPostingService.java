@@ -4,6 +4,7 @@ import com.artivisi.accountingfinance.entity.JournalTemplate;
 import com.artivisi.accountingfinance.entity.JournalTemplateLine;
 import com.artivisi.accountingfinance.entity.Transaction;
 import com.artivisi.accountingfinance.repository.JournalTemplateRepository;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,32 +34,42 @@ public class DocumentPostingService {
     private final TransactionService transactionService;
 
     /**
+     * Parameters for composing a DRAFT transaction from a journal template.
+     *
+     * @param fixedTemplateId    optional well-known template UUID (matched first; may be null)
+     * @param templateName       template name used as the resolution fallback (required)
+     * @param date               transaction date
+     * @param description        transaction description
+     * @param amount             template formula input (e.g. subtotal; PPN/AR computed by formulas)
+     * @param hintToAccount      maps each template line's account_hint to the resolved account id
+     * @param variables          named amounts consumed by the template formulas
+     * @param createdBy          audit actor
+     * @param sourceDocumentType document type backlink (e.g. INVOICE, BILL, ASSET)
+     * @param sourceDocumentId   document id backlink
+     */
+    @Builder
+    public record DraftRequest(UUID fixedTemplateId, String templateName,
+                               LocalDate date, String description, BigDecimal amount,
+                               Map<String, UUID> hintToAccount,
+                               Map<String, BigDecimal> variables, String createdBy,
+                               String sourceDocumentType, UUID sourceDocumentId) {}
+
+    /**
      * Compose a DRAFT transaction from a journal template, binding the template's
      * account-hint lines to concrete accounts.
      *
-     * @param fixedTemplateId optional well-known template UUID (matched first; may be null)
-     * @param templateName    template name used as the resolution fallback (required)
-     * @param date            transaction date
-     * @param description     transaction description
-     * @param amount          template formula input (e.g. subtotal; PPN/AR computed by formulas)
-     * @param hintToAccount   maps each template line's account_hint to the resolved account id
-     * @param createdBy       audit actor
      * @return the persisted DRAFT transaction (no journal entries until posted)
      */
-    public Transaction createDraftFromTemplate(UUID fixedTemplateId, String templateName,
-                                               LocalDate date, String description, BigDecimal amount,
-                                               Map<String, UUID> hintToAccount,
-                                               Map<String, BigDecimal> variables, String createdBy,
-                                               String sourceDocumentType, UUID sourceDocumentId) {
-        JournalTemplate template = resolveTemplate(fixedTemplateId, templateName);
+    public Transaction createDraftFromTemplate(DraftRequest request) {
+        JournalTemplate template = resolveTemplate(request.fixedTemplateId(), request.templateName());
 
         Map<UUID, UUID> accountMappings = new HashMap<>();
         for (JournalTemplateLine line : template.getLines()) {
             if (line.getAccount() == null && line.getAccountHint() != null) {
-                UUID accountId = hintToAccount.get(line.getAccountHint());
+                UUID accountId = request.hintToAccount().get(line.getAccountHint());
                 if (accountId == null) {
                     throw new IllegalStateException("No account mapped for template hint '"
-                            + line.getAccountHint() + "' on template '" + templateName + "'");
+                            + line.getAccountHint() + "' on template '" + request.templateName() + "'");
                 }
                 accountMappings.put(line.getId(), accountId);
             }
@@ -66,15 +77,15 @@ public class DocumentPostingService {
 
         Transaction transaction = new Transaction();
         transaction.setJournalTemplate(template);
-        transaction.setTransactionDate(date);
-        transaction.setAmount(amount);
-        transaction.setDescription(description);
-        transaction.setCreatedBy(createdBy);
-        transaction.setSourceDocumentType(sourceDocumentType);
-        transaction.setSourceDocumentId(sourceDocumentId);
+        transaction.setTransactionDate(request.date());
+        transaction.setAmount(request.amount());
+        transaction.setDescription(request.description());
+        transaction.setCreatedBy(request.createdBy());
+        transaction.setSourceDocumentType(request.sourceDocumentType());
+        transaction.setSourceDocumentId(request.sourceDocumentId());
 
         // create() sets DRAFT and stores the account mappings + variables; journal is computed at post.
-        return transactionService.create(transaction, accountMappings, variables);
+        return transactionService.create(transaction, accountMappings, request.variables());
     }
 
     private JournalTemplate resolveTemplate(UUID fixedTemplateId, String templateName) {

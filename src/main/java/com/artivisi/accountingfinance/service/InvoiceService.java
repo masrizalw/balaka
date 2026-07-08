@@ -271,10 +271,17 @@ public class InvoiceService {
             variables.put("ppnAmount", ppnAmount);
             variables.put("arAmount", arAmount);
 
-            documentPostingService.createDraftFromTemplate(
-                    null, "Pengakuan Pendapatan Invoice", invoice.getInvoiceDate(),
-                    "Invoice " + invoice.getInvoiceNumber() + " - " + group.getValue().getAccountName(),
-                    arAmount, hints, variables, "system", "INVOICE", invoice.getId());
+            documentPostingService.createDraftFromTemplate(DocumentPostingService.DraftRequest.builder()
+                    .templateName("Pengakuan Pendapatan Invoice")
+                    .date(invoice.getInvoiceDate())
+                    .description("Invoice " + invoice.getInvoiceNumber() + " - " + group.getValue().getAccountName())
+                    .amount(arAmount)
+                    .hintToAccount(hints)
+                    .variables(variables)
+                    .createdBy("system")
+                    .sourceDocumentType("INVOICE")
+                    .sourceDocumentId(invoice.getId())
+                    .build());
         }
     }
 

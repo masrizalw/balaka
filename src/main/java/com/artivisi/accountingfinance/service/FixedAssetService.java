@@ -173,10 +173,17 @@ public class FixedAssetService {
         hints.put("BANK", saved.getFundingAccount().getId());
         Map<String, BigDecimal> variables = new HashMap<>();
         variables.put("assetCost", saved.getPurchaseCost());
-        documentPostingService.createDraftFromTemplate(
-                null, "Pembelian Aset Tetap", saved.getPurchaseDate(),
-                "Pembelian " + saved.getAssetCode() + " - " + saved.getName(),
-                saved.getPurchaseCost(), hints, variables, "system", "ASSET", saved.getId());
+        documentPostingService.createDraftFromTemplate(DocumentPostingService.DraftRequest.builder()
+                .templateName("Pembelian Aset Tetap")
+                .date(saved.getPurchaseDate())
+                .description("Pembelian " + saved.getAssetCode() + " - " + saved.getName())
+                .amount(saved.getPurchaseCost())
+                .hintToAccount(hints)
+                .variables(variables)
+                .createdBy("system")
+                .sourceDocumentType("ASSET")
+                .sourceDocumentId(saved.getId())
+                .build());
 
         log.info("Created fixed asset: {} - {}", LogSanitizer.sanitize(saved.getAssetCode()), LogSanitizer.sanitize(saved.getName()));
         return saved;

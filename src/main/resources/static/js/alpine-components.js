@@ -30,6 +30,38 @@ function registerAlpineComponents() {
     registerFormComponents()
 }
 
+// Shared shape for the CSP-safe search comboboxes (account/client/vendor pickers).
+// Each <div x-data="..."> carries data-initial-id and data-initial-label set by
+// Thymeleaf; the server search endpoint returns at most 10 {id, code, name} rows.
+function searchPicker(endpoint) {
+    return () => ({
+        open: false,
+        results: [],
+        label: '',
+        selectedId: '',
+        init() {
+            this.label = this.$el.dataset.initialLabel || ''
+            this.selectedId = this.$el.dataset.initialId || ''
+        },
+        focusPicker() {
+            this.open = true
+            if (this.results.length === 0) this.search()
+        },
+        search() {
+            const q = encodeURIComponent(this.label || '')
+            fetch(endpoint + '?q=' + q, { headers: { 'Accept': 'application/json' } })
+                .then(r => r.ok ? r.json() : [])
+                .then(data => { this.results = data })
+        },
+        select(item) {
+            this.selectedId = item.id
+            this.label = item.code + ' - ' + item.name
+            this.results = []
+            this.open = false
+        }
+    })
+}
+
 function registerBasicStates() {
     // Simple toggle state (open/closed)
     Alpine.data('toggleState', () => ({
@@ -45,92 +77,17 @@ function registerBasicStates() {
     // CSP-safe combobox for picking a Chart of Accounts entry. Each <div x-data="accountPicker">
     // carries data-initial-id and data-initial-label set by Thymeleaf. Server search via
     // GET /accounts/search?q=... returns at most 10 results.
-    Alpine.data('accountPicker', () => ({
-        open: false,
-        results: [],
-        label: '',
-        selectedId: '',
-        init() {
-            this.label = this.$el.dataset.initialLabel || ''
-            this.selectedId = this.$el.dataset.initialId || ''
-        },
-        focusPicker() {
-            this.open = true
-            if (this.results.length === 0) this.search()
-        },
-        search() {
-            const q = encodeURIComponent(this.label || '')
-            fetch('/accounts/search?q=' + q, { headers: { 'Accept': 'application/json' } })
-                .then(r => r.ok ? r.json() : [])
-                .then(data => { this.results = data })
-        },
-        select(a) {
-            this.selectedId = a.id
-            this.label = a.code + ' - ' + a.name
-            this.results = []
-            this.open = false
-        }
-    }))
+    Alpine.data('accountPicker', searchPicker('/accounts/search'))
 
     // CSP-safe combobox for picking a Client. Same shape as accountPicker, hits
     // GET /clients/search?q=... which returns at most 10 results. Used by invoice
     // forms where the client list is unbounded in production.
-    Alpine.data('clientPicker', () => ({
-        open: false,
-        results: [],
-        label: '',
-        selectedId: '',
-        init() {
-            this.label = this.$el.dataset.initialLabel || ''
-            this.selectedId = this.$el.dataset.initialId || ''
-        },
-        focusPicker() {
-            this.open = true
-            if (this.results.length === 0) this.search()
-        },
-        search() {
-            const q = encodeURIComponent(this.label || '')
-            fetch('/clients/search?q=' + q, { headers: { 'Accept': 'application/json' } })
-                .then(r => r.ok ? r.json() : [])
-                .then(data => { this.results = data })
-        },
-        select(c) {
-            this.selectedId = c.id
-            this.label = c.code + ' - ' + c.name
-            this.results = []
-            this.open = false
-        }
-    }))
+    Alpine.data('clientPicker', searchPicker('/clients/search'))
 
     // CSP-safe combobox for picking a Vendor. Same shape as clientPicker, hits
     // GET /vendors/search?q=... which returns at most 10 results. Used by bill
     // forms where the vendor list is unbounded in production.
-    Alpine.data('vendorPicker', () => ({
-        open: false,
-        results: [],
-        label: '',
-        selectedId: '',
-        init() {
-            this.label = this.$el.dataset.initialLabel || ''
-            this.selectedId = this.$el.dataset.initialId || ''
-        },
-        focusPicker() {
-            this.open = true
-            if (this.results.length === 0) this.search()
-        },
-        search() {
-            const q = encodeURIComponent(this.label || '')
-            fetch('/vendors/search?q=' + q, { headers: { 'Accept': 'application/json' } })
-                .then(r => r.ok ? r.json() : [])
-                .then(data => { this.results = data })
-        },
-        select(v) {
-            this.selectedId = v.id
-            this.label = v.code + ' - ' + v.name
-            this.results = []
-            this.open = false
-        }
-    }))
+    Alpine.data('vendorPicker', searchPicker('/vendors/search'))
 
     // Toggle state with hasQuery flag (for search filters)
     Alpine.data('searchFilterState', () => ({
@@ -217,70 +174,50 @@ function registerBasicStates() {
     }))
 }
 
+// Sidebar section state persisted in localStorage under the given key.
+// Non-persistent open/close toggle with a configurable initial state.
+function plainToggle(openByDefault) {
+    return () => ({
+        open: openByDefault,
+        toggle() {
+            this.open = !this.open
+        }
+    })
+}
+
+function persistedNav(openByDefault, storageKey) {
+    return () => ({
+        open: Alpine.$persist(openByDefault).as(storageKey),
+        toggle() {
+            this.open = !this.open
+        }
+    })
+}
+
 function registerNavigationStates() {
     // Persistent navigation state for accounting section
-    Alpine.data('navAkuntansi', () => ({
-        open: Alpine.$persist(true).as('nav-akuntansi'),
-        toggle() {
-            this.open = !this.open
-        }
-    }))
+    Alpine.data('navAkuntansi', persistedNav(true, 'nav-akuntansi'))
 
     // Persistent navigation state for reports section
-    Alpine.data('navLaporan', () => ({
-        open: Alpine.$persist(false).as('nav-laporan'),
-        toggle() {
-            this.open = !this.open
-        }
-    }))
+    Alpine.data('navLaporan', persistedNav(false, 'nav-laporan'))
 
     // Persistent navigation state for projects section
-    Alpine.data('navProyek', () => ({
-        open: Alpine.$persist(false).as('nav-proyek'),
-        toggle() {
-            this.open = !this.open
-        }
-    }))
+    Alpine.data('navProyek', persistedNav(false, 'nav-proyek'))
 
     // Persistent navigation state for inventory section
-    Alpine.data('navInventori', () => ({
-        open: Alpine.$persist(false).as('nav-inventori'),
-        toggle() {
-            this.open = !this.open
-        }
-    }))
+    Alpine.data('navInventori', persistedNav(false, 'nav-inventori'))
 
     // Persistent navigation state for payroll section
-    Alpine.data('navPayroll', () => ({
-        open: Alpine.$persist(false).as('nav-payroll'),
-        toggle() {
-            this.open = !this.open
-        }
-    }))
+    Alpine.data('navPayroll', persistedNav(false, 'nav-payroll'))
 
     // Persistent navigation state for master data section
-    Alpine.data('navMaster', () => ({
-        open: Alpine.$persist(false).as('nav-master'),
-        toggle() {
-            this.open = !this.open
-        }
-    }))
+    Alpine.data('navMaster', persistedNav(false, 'nav-master'))
 
     // Open by default navigation section
-    Alpine.data('navOpenDefault', () => ({
-        open: true,
-        toggle() {
-            this.open = !this.open
-        }
-    }))
+    Alpine.data('navOpenDefault', plainToggle(true))
 
     // Closed by default navigation section
-    Alpine.data('navClosedDefault', () => ({
-        open: false,
-        toggle() {
-            this.open = !this.open
-        }
-    }))
+    Alpine.data('navClosedDefault', plainToggle(false))
 }
 
 // Blank line factory for the free-form journal entry form (journalEntryForm below).
