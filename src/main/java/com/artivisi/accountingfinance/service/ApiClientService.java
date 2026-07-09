@@ -104,7 +104,7 @@ public class ApiClientService {
     private String generateClientId(String name) {
         String slug = name.toLowerCase(Locale.ROOT)
                 .replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("(^-|-$)", "");
+                .replaceAll("(?:^-)|(?:-$)", "");
         if (slug.length() > 38) {
             slug = slug.substring(0, 38);
         }

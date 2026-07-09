@@ -366,7 +366,7 @@ public class RecurringTransactionService {
         if (dayOfWeek != null) {
             DayOfWeek target = DayOfWeek.of(dayOfWeek);
             LocalDate d = fromDate;
-            while (d.getDayOfWeek() != target) {
+            while (!d.getDayOfWeek().equals(target)) {
                 d = d.plusDays(1);
             }
             return d;
@@ -423,7 +423,7 @@ public class RecurringTransactionService {
 
     private static boolean isWeekend(LocalDate date) {
         DayOfWeek dow = date.getDayOfWeek();
-        return dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY;
+        return dow.equals(DayOfWeek.SATURDAY) || dow.equals(DayOfWeek.SUNDAY);
     }
 
     public List<RecurringTransactionLog> findLogsByRecurringId(UUID recurringId) {

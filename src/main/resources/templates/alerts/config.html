@@ -42,6 +42,7 @@
                                 <span th:if="${rule.alertType.name() == 'CASH_LOW' or rule.alertType.name() == 'RECEIVABLE_OVERDUE'}" class="text-xs text-gray-500">Rp</span>
                                 <label th:for="${'threshold-' + rule.id}" class="sr-only">Ambang batas</label>
                                 <input type="number" name="threshold" step="0.01"
+                                       aria-label="Ambang batas"
                                        th:id="${'threshold-' + rule.id}"
                                        th:value="${rule.threshold}"
                                        class="w-32 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
@@ -54,6 +55,7 @@
                         <div class="flex items-center gap-2">
                             <label th:for="${'enabled-' + rule.id}" class="text-xs text-gray-500">Aktif</label>
                             <input type="checkbox" name="enabled" value="true"
+                                   aria-label="Aktif"
                                    th:id="${'enabled-' + rule.id}"
                                    th:checked="${rule.enabled}"
                                    class="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">

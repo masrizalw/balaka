@@ -76,6 +76,10 @@ public class TransactionApiController {
                            + "the original transaction with HTTP 200 instead of creating a second one.")
     @ApiResponse(responseCode = "201", description = "Transaction created and posted")
     @ApiResponse(responseCode = "200", description = "Idempotency-Key replay - original transaction returned")
+    // S6863: returning HTTP 200 from the DataIntegrityViolation catch is the documented
+    // idempotency-replay contract (the winning concurrent insert already created the resource),
+    // not an error masked as success.
+    @SuppressWarnings("java:S6863")
     public ResponseEntity<TransactionResponse> createTransaction(
             @Valid @RequestBody CreateTransactionRequest request,
             @Parameter(description = "Caller-generated key making this post retry-safe; "

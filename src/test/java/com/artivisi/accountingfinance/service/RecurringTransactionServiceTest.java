@@ -430,7 +430,7 @@ class RecurringTransactionServiceTest {
         void shouldSkipWeekendsWhenEnabled() {
             // Find a Saturday
             LocalDate saturday = LocalDate.now();
-            while (saturday.getDayOfWeek() != DayOfWeek.SATURDAY) {
+            while (!saturday.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
                 saturday = saturday.plusDays(1);
             }
 
