@@ -1,5 +1,6 @@
 package com.artivisi.accountingfinance.controller;
 
+import com.artivisi.accountingfinance.exception.MissingConfigurationException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +58,20 @@ public class RestExceptionHandler {
                         HttpStatus.BAD_REQUEST.value(),
                         ERR_BAD_REQUEST,
                         "The request was invalid.",
+                        LocalDateTime.now()
+                ));
+    }
+
+    @ExceptionHandler(MissingConfigurationException.class)
+    public ResponseEntity<ErrorResponse> handleMissingConfiguration(MissingConfigurationException ex) {
+        // Server-side misconfiguration (missing seed/config) — surface the real,
+        // actionable message rather than masking it as a generic conflict.
+        log.error("Missing configuration: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse(
+                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                        "Configuration Error",
+                        ex.getMessage(),
                         LocalDateTime.now()
                 ));
     }

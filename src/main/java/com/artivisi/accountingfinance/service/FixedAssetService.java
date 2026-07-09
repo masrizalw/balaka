@@ -12,6 +12,7 @@ import com.artivisi.accountingfinance.entity.FixedAsset;
 import com.artivisi.accountingfinance.entity.JournalTemplate;
 import com.artivisi.accountingfinance.entity.JournalTemplateLine;
 import com.artivisi.accountingfinance.entity.Transaction;
+import com.artivisi.accountingfinance.exception.MissingConfigurationException;
 import com.artivisi.accountingfinance.repository.AssetCategoryRepository;
 import com.artivisi.accountingfinance.repository.ChartOfAccountRepository;
 import com.artivisi.accountingfinance.repository.DepreciationEntryRepository;
@@ -440,7 +441,11 @@ public class FixedAssetService {
                 .map(t -> journalTemplateService.findByIdWithLines(t.getId()))
                 .orElseGet(() -> journalTemplateRepository.findByTemplateNameAndIsCurrentVersionTrue("Penyusutan Aset")
                         .map(t -> journalTemplateService.findByIdWithLines(t.getId()))
-                        .orElseThrow(() -> new IllegalStateException("Template penyusutan tidak ditemukan")));
+                        .orElseThrow(() -> new MissingConfigurationException(
+                                "Template jurnal penyusutan tidak ditemukan (id " + DEPRECIATION_TEMPLATE_ID
+                                        + " atau template current-version bernama 'Penyusutan Aset'). "
+                                        + "Buat template sistem penyusutan dengan baris DEBIT hint BEBAN_PENYUSUTAN "
+                                        + "dan CREDIT hint AKUM_PENYUSUTAN.")));
 
         // Create FormulaContext with depreciation variables
         FormulaContext context = FormulaContext.of(

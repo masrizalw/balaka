@@ -58,6 +58,9 @@ class FixedAssetServiceTest {
     @Autowired
     private com.artivisi.accountingfinance.repository.ChartOfAccountRepository chartOfAccountRepository;
 
+    @Autowired
+    private com.artivisi.accountingfinance.repository.JournalTemplateRepository journalTemplateRepository;
+
     private AssetCategory getOrCreateCategory() {
         return assetCategoryRepository.findAll().stream().findFirst()
                 .orElseGet(() -> {
@@ -513,6 +516,49 @@ class FixedAssetServiceTest {
             assertThatThrownBy(() -> fixedAssetService.skipDepreciationEntry(savedEntry.getId()))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("PENDING");
+        }
+
+        @Test
+        @DisplayName("Should throw MissingConfigurationException (not masked conflict) when depreciation template absent")
+        void shouldThrowMissingConfigurationWhenTemplateAbsent() {
+            // Regression for issue #33: with no resolvable depreciation template,
+            // posting must surface an actionable config error, not a masked 409.
+            AssetCategory category = getOrCreateCategory();
+            FixedAsset asset = new FixedAsset();
+            asset.setAssetCode("NOTMPL-DEP-" + System.currentTimeMillis());
+            asset.setName("Missing Template Test");
+            asset.setCategory(category);
+            asset.setPurchaseDate(LocalDate.now().minusMonths(2));
+            asset.setPurchaseCost(new BigDecimal("12000000"));
+            asset.setUsefulLifeMonths(12);
+            asset.setDepreciationMethod(DepreciationMethod.STRAIGHT_LINE);
+            asset.setFundingAccount(chartOfAccountRepository.findByAccountCode("1.1.02").orElseThrow());
+            asset.setDepreciationStartDate(LocalDate.now().minusMonths(1).withDayOfMonth(1));
+            FixedAsset savedAsset = fixedAssetService.create(asset);
+
+            DepreciationEntry entry = new DepreciationEntry();
+            entry.setFixedAsset(savedAsset);
+            entry.setPeriodNumber(1);
+            entry.setPeriodStart(LocalDate.now().withDayOfMonth(1));
+            entry.setPeriodEnd(LocalDate.now().withDayOfMonth(1).plusMonths(1).minusDays(1));
+            entry.setDepreciationAmount(new BigDecimal("1000000"));
+            entry.setAccumulatedDepreciation(new BigDecimal("1000000"));
+            entry.setBookValue(new BigDecimal("11000000"));
+            entry.setStatus(DepreciationEntryStatus.PENDING);
+            DepreciationEntry savedEntry = depreciationEntryRepository.save(entry);
+
+            // Remove the only resolvable template: the fixed-id one is named
+            // "Penyusutan Aset Tetap", so the name fallback ("Penyusutan Aset")
+            // does not match once this is gone.
+            journalTemplateRepository.deleteById(
+                    UUID.fromString("e0000000-0000-0000-0000-000000000016"));
+            journalTemplateRepository.flush();
+
+            assertThatThrownBy(() -> fixedAssetService.postDepreciationEntry(savedEntry.getId(), "tester"))
+                    .isInstanceOf(com.artivisi.accountingfinance.exception.MissingConfigurationException.class)
+                    .hasMessageContaining("Template jurnal penyusutan tidak ditemukan")
+                    .hasMessageContaining("BEBAN_PENYUSUTAN")
+                    .hasMessageContaining("AKUM_PENYUSUTAN");
         }
 
         @Test
