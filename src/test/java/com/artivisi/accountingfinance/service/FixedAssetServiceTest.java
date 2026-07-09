@@ -296,6 +296,29 @@ class FixedAssetServiceTest {
         }
 
         @Test
+        @DisplayName("Should toggle autoPost even for asset with depreciation history")
+        void shouldToggleAutoPostWithDepreciationHistory() {
+            // Regression for issue #34: autoPost is an operational flag and must be
+            // updatable via the limited-update branch (depreciationPeriodsCompleted > 0).
+            FixedAsset asset = createTestAsset("AUTOPOST");
+            assertThat(asset.isAutoPost()).isFalse();
+
+            // Simulate an asset that has already depreciated at least one period.
+            asset.setDepreciationPeriodsCompleted(1);
+            fixedAssetRepository.save(asset);
+
+            FixedAsset updateData = new FixedAsset();
+            updateData.setName(asset.getName());
+            updateData.setAutoPost(true);
+
+            FixedAsset updated = fixedAssetService.update(asset.getId(), updateData);
+
+            assertThat(updated.isAutoPost()).isTrue();
+            // Persisted, not just returned.
+            assertThat(fixedAssetRepository.findById(asset.getId()).orElseThrow().isAutoPost()).isTrue();
+        }
+
+        @Test
         @DisplayName("Should reject update of disposed asset")
         void shouldRejectUpdateOfDisposedAsset() {
             FixedAsset asset = createTestAsset("DISPOSED-UPD");

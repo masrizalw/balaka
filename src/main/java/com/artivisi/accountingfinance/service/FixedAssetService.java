@@ -260,6 +260,10 @@ public class FixedAssetService {
             }
         }
 
+        // autoPost is an operational flag (scheduler posts vs. leaves PENDING), not a
+        // financial attribute — togglable in both branches even after depreciation history.
+        existing.setAutoPost(assetData.isAutoPost());
+
         FixedAsset saved = fixedAssetRepository.save(existing);
         log.info("Updated fixed asset: {}", LogSanitizer.sanitize(saved.getAssetCode()));
         return saved;
